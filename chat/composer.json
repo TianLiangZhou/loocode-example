@@ -1,0 +1,17 @@
+{
+  "name": "chat/chat",
+  "version": "1.0.0",
+  "require": {
+    "php": ">=7.1.0",
+    "vlucas/phpdotenv": "^2.4",
+    "ramsey/uuid": "^3.6"
+  },
+  "autoload": {
+      "psr-4": {
+        "Chat\\": "./bin"
+      }
+  },
+  "require-dev": {
+    "phpunit/phpunit": "6.0"
+  }
+}
