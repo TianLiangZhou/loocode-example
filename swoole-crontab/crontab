@@ -1,0 +1,7 @@
+#!/usr/bin/php
+<?php
+echo date('Y-m-d H:i:s');
+swoole_timer_tick(1000, function($timeId, $params = null) {
+    echo "Hello";
+    echo date('Y-m-d H:i:s');
+});
