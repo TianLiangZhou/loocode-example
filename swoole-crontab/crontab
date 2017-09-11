@@ -1,7 +1,118 @@
 #!/usr/bin/php
 <?php
-echo date('Y-m-d H:i:s');
-swoole_timer_tick(1000, function($timeId, $params = null) {
-    echo "Hello";
-    echo date('Y-m-d H:i:s');
+
+include __DIR__ . '/vendor/autoload.php';
+
+use Symfony\Component\Process\Process;
+
+$crontab = <<<EOF
+0 * * * * php -m >>
+0 1 * * * php -m
+0 3 1 * * php -m
+EOF;
+
+class Task
+{
+    private $taskString;
+
+    /**
+     *
+     */
+    private $min;
+
+    private $hour;
+
+    private $day;
+
+    private $month;
+
+    private $week;
+
+    private $command;
+
+    private $process;
+
+    public function __construct(string $taskString)
+    {
+        $this->taskString = $taskString;
+        $this->initialize();
+    }
+
+    private function initialize()
+    {
+        //过滤多余的空格
+        $format = array_filter(explode(" ", $this->taskString), function($value) {
+            return $value != "";
+        });
+        if (count($format) < 7) {
+            throw new ErrorException("'taskString' parse failed");
+        }
+        $this->min = $format[0];
+        $this->hour= $format[1];
+        $this->day = $format[2];
+        $this->week= $format[4];
+        $this->month = $format[3];
+        $this->command = array_slice($format, 5);
+    }
+    
+
+    public function run()
+    {
+        if (null === $this->process) {
+            $this->process = new Process(implode(" ", $this->command));
+        }
+        $this->process->start();
+    }
+}
+
+class Job implements Iterator
+{
+    private $position = 0;
+    private $jobs = [];
+
+    public function addJob(Task $task)
+    {
+        $this->jobs[] = $task;
+    }
+
+    public function current()
+    {
+        return $this->jobs[$this->position];
+    }
+
+    public function key()
+    {
+        return $this->position;
+    }
+
+    public function next()
+    {
+        ++$this->position;
+    }
+
+    public function rewind()
+    {
+        $this->position = 0;
+    }
+
+    public function valid()
+    {
+        return isset($this->jobs[$this->position]);
+    }
+}
+
+
+$startTime = time();
+
+$jobs = new Job();
+
+foreach (explode("\n", $crontab) as $task) {
+    $jobs->addJob(new Task($task));
+}
+swoole_timer_tick(1000, function($timeId, $params = null) use ($jobs) {
+    $current = time();
+    foreach ($jobs as $task) {
+        $task->run();
+    }
+    swoole_timer_clear($timeId);
 });

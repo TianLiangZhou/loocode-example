@@ -1,5 +1,6 @@
 {
-    "reqiure": {
-        
+    "require": {
+        "php": "^7.0",
+        "symfony/process": "^3.3"
     }
 }
