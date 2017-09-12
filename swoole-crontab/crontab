@@ -1,14 +1,27 @@
 #!/usr/bin/php
 <?php
 
+define('FIRST_MIN', 0);
+define('LAST_MIN', 59);
+define('FIRST_HOUR', 0);
+define('LAST_HOUR', 23);
+define('FIRST_DAY', 1);
+define('LAST_DAY', 31);
+define('FIRST_MONTH', 1);
+define('LAST_MONTH', 12);
+define('FIRST_WEEK', 0);
+define('LAST_WEEK', 6);
+
+
+
 include __DIR__ . '/vendor/autoload.php';
 
 use Symfony\Component\Process\Process;
 
+$command = "php " . __DIR__ . '/example.php';
+
 $crontab = <<<EOF
-0 * * * * php -m >>
-0 1 * * * php -m
-0 3 1 * * php -m
+45 * * * * $command
 EOF;
 
 class Task
@@ -32,29 +45,91 @@ class Task
 
     private $process;
 
+    private $runTime;
+
     public function __construct(string $taskString)
     {
         $this->taskString = $taskString;
+        $this->runTime = time();
         $this->initialize();
     }
 
     private function initialize()
     {
         //过滤多余的空格
-        $format = array_filter(explode(" ", $this->taskString), function($value) {
+        $rule = array_filter(explode(" ", $this->taskString), function($value) {
             return $value != "";
         });
-        if (count($format) < 7) {
+        if (count($rule) < 7) {
             throw new ErrorException("'taskString' parse failed");
         }
-        $this->min = $format[0];
-        $this->hour= $format[1];
-        $this->day = $format[2];
-        $this->week= $format[4];
-        $this->month = $format[3];
-        $this->command = array_slice($format, 5);
+        $this->min = $this->format($rule[0], 'min');
+        $this->hour= $this->format($rule[1], 'hour');
+        $this->day = $this->format($rule[2], 'day');
+        $this->week= $this->format($rule[4], 'week');
+        $this->month = $this->format($rule[3], 'month');
+        $this->command = array_slice($rule, 5);
     }
-    
+
+    private function format($value, $field)
+    {
+        if ($value === '*') {
+            return $value;
+        }
+        if (is_numeric($value)) {
+            return [$this->checkFieldRule($value, $field)];
+        }
+        $steps = explode(',', $value);
+        $scope = [];
+        foreach ($steps as $step) {
+            if (strpos($step, '-') !== false) {
+                $range = explode('-', $step);
+                $scope = array_merge($scope, range(
+                    $this->checkFieldRule($range[0], $field),
+                    $this->checkFieldRule($range[1], $field)
+                ));
+                continue;
+            }
+            if (strpos($step, '/') !== false) {
+                $inter = explode('/', $step);
+                $confirmInter = isset($inter[1]) ? $inter[1] : $inter[0];
+                if ($confirmInter === '/') {
+                    $confirmInter = 1; 
+                }
+                $scope = array_merge($scope, range(
+                    constant('FIRST_' . strtoupper($field)),
+                    constant('LAST_' . strtoupper($field)),
+                    $confirmInter
+                ));
+                continue;
+            }
+            $scope[] = $step;
+        }
+        return $scope;
+    }
+
+    private function checkFieldRule($value, $field)
+    {
+        $first = constant('FIRST_' . strtoupper($field));
+        $last  = constant('LAST_' . strtoupper($field));
+        if ($value < $first) {
+            return $first;
+        }
+        if ($value > $last) {
+            return $last;
+        }
+        return (int) $value;
+    }
+
+    public function getTimeAttribute($attribute)
+    {
+        return $this->{$attribute} ?? null;
+    }
+
+    public function setRunTime($time)
+    {
+        $this->runTime = $time;
+    }
 
     public function run()
     {
@@ -101,18 +176,30 @@ class Job implements Iterator
     }
 }
 
-
-$startTime = time();
-
 $jobs = new Job();
-
 foreach (explode("\n", $crontab) as $task) {
     $jobs->addJob(new Task($task));
 }
-swoole_timer_tick(1000, function($timeId, $params = null) use ($jobs) {
+swoole_timer_tick(1000 * 60, function($timeId, $params = null) use ($jobs) {
     $current = time();
+    list($week, $month, $day, $hour, $min) = explode('|', date('w|n|j|G|i', $current));
     foreach ($jobs as $task) {
-        $task->run();
+        $ready = 0;
+        //$diff = $task->getTimeAttribute('runTime') - $current;
+        foreach (['min', 'hour', 'day', 'month', 'week'] as $key => $field) {
+            $value = $task->getTimeAttribute($field);
+            if ($value === '*') {
+                $ready += 1;
+                continue;
+            }
+            $ready += in_array($min, $value) ? 1: 0;
+        }
+        if (5 === $ready) {
+            //执行任务
+            $task->run();
+            //更新运行时间
+            $task->setRunTime($current);
+        }
     }
-    swoole_timer_clear($timeId);
+    //swoole_timer_clear($timeId);
 });
