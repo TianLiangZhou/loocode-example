@@ -63,13 +63,17 @@
         var gridSize = this.options.x * this.options.y,
             snakeLocus = [],
             endLocus = null,
-            over = false;
+            direct = this.options.direct,
+            angle = {"left": 90, "right": 270, "up": 0, "down": 180};
         var create = function() {
             var start = gridSize / 2;
             snakeLocus.push(start);
         };
-        var direct = this.options.direct;
+
         this.setDirection = function(value) {
+            if (Math.abs(angle[direct] - angle[value]) === 180 && length > 1) {
+                return ;
+            }
             direct = value;
         };
         this.getDirection = function() {
@@ -194,7 +198,9 @@
                 width: 900,
                 height: 500,
                 grid: 30,
-                snake: {},
+                snake: {
+                    direct: 'right'
+                },
                 point: {}
             };
         this.options = _.merge(defaults, options);
@@ -205,10 +211,11 @@
         this.options.y = y;
         this.snake = null;
         this.point = null;
+        this.frame = null;
     }
     Frame.prototype = {
         create: function() {
-            var element = document.createElement('div');
+            var element = this.frame = document.createElement('div');
             element.style.margin = "50px auto";
             element.style.height = this.options.height + "px";
             element.style.width  = this.options.width + "px";
@@ -285,8 +292,30 @@
 
             }
         });
+        var over = function() {
+            var gameOver = document.createElement('div');
+            gameOver.innerHTML = "Game Over";
+            gameOver.style.font = "normal bold 100px source code pro,arial,sans-serif";
+            gameOver.style.color = "red";
+            gameOver.style.width = "100%";
+            gameOver.style.textAlign = "center";
+            gameOver.style.position = "absolute";
+            gameOver.style.top = "80px";
+            var restart = document.createElement('a');
+            restart.setAttribute('href', "javascript:;");
+            restart.text = "重新开始";
+            restart.style.display = "block";
+            restart.style.fontSize = "50px";
+            restart.style.color = "#f4645f";
+            Events.on('click', function() {
+                gameOver.remove();
+            }, restart);
+            gameOver.appendChild(restart);
+            frame.frame.appendChild(gameOver);
+        };
         Events.on('over', function() {
             clearInterval(clock);
+            over();
         });
         frame.create();
     };
