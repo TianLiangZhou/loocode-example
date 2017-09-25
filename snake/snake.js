@@ -13,9 +13,19 @@
         },
         extend: function(source, parent, pro) {
 
+        },
+        inArray: function(array, position) {
+            if (array.includes) {
+                return array.includes(position);
+            }
+            if (array.indexOf(position) >= 0) {
+                return true;
+            }
+            return false;
         }
     };
 
+    var _listening = [];
     var Events = {
         on: function(type, callback, element) {
             var ele = element || window;
@@ -23,26 +33,37 @@
                 element.attachEvent("on" + type, callback);
             };
             listener(type, callback);
+            _listening.push({'event': type, 'element': element, 'callback': callback});
         },
         remove: function(type, element, callback) {
             var ele = element || window;
             var listener = ele.removeEventListener || ele.detachEvent;
             listener('on' + type, callback);
+        },
+        trigger: function(type, object, options) {
+            for (var i in _listening) {
+                if (_listening[i].event === type) {
+                    _listening[i].callback.apply(object || window, options || []);
+                }
+            }
         }
     };
 
-    var Snake = function(options) {
+    var Snake = function(options, point) {
         var defaults = {
                 grid: 30,
                 color: "green",
                 x: 0,
                 y: 0,
-                direct: 'left'
+                direct: 'left',
+                sourceColor: '#FFF'
             },
             length = 1;
         this.options = _.merge(defaults, options);
-        var gridSize = this.options.x * this.options.y;
-        var snakeLocus = [];
+        var gridSize = this.options.x * this.options.y,
+            snakeLocus = [],
+            endLocus = null,
+            over = false;
         var create = function() {
             var start = gridSize / 2;
             snakeLocus.push(start);
@@ -57,8 +78,26 @@
         this.getSnakeLocus = function() {
             return snakeLocus;
         };
-        this.addSnakeLocus = function(value) {
+        this.push = function(value) {
             snakeLocus.push(value);
+        };
+        this.pop = function() {
+            endLocus = snakeLocus.pop();
+        };
+        this.unshift = function(value) {
+            snakeLocus.unshift(value);
+        };
+        this.getEndLocus = function() {
+            return endLocus;
+        };
+        this.getPoint = function() {
+            return point;
+        };
+        this.length = function() {
+            return length;
+        };
+        this.incremnt = function() {
+            length++;
         };
         create.call(this);
         this.create();
@@ -66,37 +105,55 @@
 
     Snake.prototype = {
         create: function() {
-            var points = this.getSnakeLocus();
-            for (var i in points) {
-                var point = document.getElementById('grid_' + points[i]);
-                point.style.backgroundColor = this.options.color;
+            var locus = this.getSnakeLocus(),
+                endLocus = this.getEndLocus();
+                point  = this.getPoint();
+            for (var i in locus) {
+                document.getElementById('grid_' + locus[i]).style.backgroundColor = this.options.color;
+            }
+            if (point.getPosition() === locus[0]) {
+                this.eat(endLocus);
+            } else {
+                if (endLocus) {
+                    document.getElementById('grid_' + endLocus).style.backgroundColor = this.options.sourceColor;
+                }
             }
         },
         move: function() {
             var locus = this.getSnakeLocus(),
-                len = points.length,
                 direct = this.getDirection(),
-                newLocus = [];
-            for (var i = 0; i < len; i++) {
-                var value = locus[i];
-                switch (direct) {
-                    case 'left':
-                        value -= 1;
-                        break;
-                    case 'up':
-                        value -= this.options.x;
-                        break;
-                    case 'right':
-                        value += 1;
-                        break;
-                    case 'down':
-                        value += this.options.x;
-                        break;
-                }
+                first = locus[0],
+                isOver = false;
+            switch (direct) {
+                case 'left':
+                    first -= 1;
+                    if (first % this.options.x === 0) isOver = true;
+                    break;
+                case 'up':
+                    first -= this.options.x;
+                    if (first < 0) isOver = true;
+                    break;
+                case 'right':
+                    first += 1;
+                    if (first % this.options.x === 1) isOver = true;
+                    break;
+                case 'down':
+                    first += this.options.x;
+                    if (first > (this.options.x * this.options.y)) isOver = true;
+                    break;
+            }
+            if (isOver) {
+                Events.trigger('over', this);
+            } else {
+                this.pop();
+                this.unshift(first);
+                this.create();
             }
         },
-        eat: function() {
-
+        eat: function(end) {
+            this.push(end);
+            this.getPoint().random(this.getSnakeLocus());
+            this.incremnt();
         }
     };
 
@@ -110,17 +167,22 @@
         this.options = _.merge(defaults, options);
         var gridSize = this.options.x * this.options.y,
             position = 0;
-        this.setPosition = function () {
+        this.setPosition = function (outer) {
             position = Math.floor(Math.random() * gridSize + 1);
+            if (outer.length > 0) {
+                if (_.inArray(outer, position)) {
+                    this.setPosition(outer);
+                }
+            }
         };
         this.getPosition = function() {
             return position;
         };
-        this.random();
+        this.random([]);
     };
     Point.prototype = {
-        random: function() {
-            this.setPosition();
+        random: function(outer) {
+            this.setPosition(outer);
             var position = this.getPosition();
             var grid = document.getElementById("grid_" + position);
             grid.style.backgroundColor = this.options.color;
@@ -159,8 +221,10 @@
             var common = {
                 x: this.options.x,y: this.options.y, size: this.options.grid
             };
-            this.snake = new Snake(_.merge(common, this.options.snake));
-            this.point = new Point(_.merge(common, this.options.point));
+            this.snake = new Snake(
+                _.merge(common, this.options.snake),
+                new Point(_.merge(common, this.options.point))
+            );
         },
         createGrid: function() {
             var x = this.options.x,
@@ -189,12 +253,17 @@
     };
     var Control = function(options) {
         var defaults = {
-            time: 1000
+            time: 500
         };
         var frame = new Frame();
         var clock = null;
         this.move = function() {
-            clock = setInterval(frame.snake.move, defaults.time);
+            clock = setInterval(
+                function() {
+                    frame.snake.move.call(frame.snake);
+                },
+                defaults.time
+            );
         };
         Events.on("keyup", function(e) {
             switch (e.which) {
@@ -210,7 +279,14 @@
                 case 40:
                     frame.snake.setDirection('down');
                     break;
+                    //暂停
+                case 19:
+                    break;
+
             }
+        });
+        Events.on('over', function() {
+            clearInterval(clock);
         });
         frame.create();
     };
