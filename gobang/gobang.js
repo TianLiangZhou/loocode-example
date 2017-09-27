@@ -10,7 +10,8 @@
         desk   = document.createElement('div'),
         standard = 19,
         size = 50,
-        width = height = standard * size - size,
+        radius = size / 2,
+        width = height = standard * size,
         child = document.body.firstChild;
     canvas.setAttribute('id', 'deskCanvas');
     canvas.setAttribute('width', width + "px");
@@ -30,18 +31,34 @@
     ctx.fillRect(0, 0, width, height);
     ctx.strokeStyle = "#999";
     ctx.lineWidth = 1;
+    ctx.beginPath();
     for (var i = 1; i <= 19; i++) {
-        ctx.beginPath();
-        ctx.moveTo(i * size - 50, 0);
-        ctx.lineTo(i * size - 50, height);
-        ctx.closePath();
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(0, i * size - 50);
-        ctx.lineTo(width, i * size - 50);
-        ctx.closePath();
-        ctx.stroke();
+        var offset = i * size - size + radius;
+        ctx.moveTo(offset, radius);
+        ctx.lineTo(offset, height - radius);
+        ctx.moveTo(radius, offset);
+        ctx.lineTo(width - radius, offset);
     }
+    ctx.stroke();
+    ctx.closePath();
+    ctx.beginPath();
+    ctx.fillStyle = "#FFF";
+    ctx.arc(75, 75, radius, 0, 2 * Math.PI);
+    ctx.arc(75, 125, radius, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.closePath();
 
+    ctx.beginPath();
+    ctx.fillStyle = "#000";
+    ctx.arc(125, 75, radius, 0, 2 * Math.PI);
+    ctx.arc(125, 125, radius, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.closePath();
+
+    ctx.beginPath();
+    ctx.fillStyle = "#000";
+    ctx.arc(475, 475, 300, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.closePath();
 
 }());
