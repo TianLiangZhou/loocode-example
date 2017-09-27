@@ -146,6 +146,10 @@
                     if (first > (this.options.x * this.options.y)) isOver = true;
                     break;
             }
+            //吃到自己
+            if (_.inArray(locus, first)) {
+                isOver = true;
+            }
             if (isOver) {
                 Events.trigger('over', this);
             } else {
@@ -210,7 +214,6 @@
         this.options.x = x;
         this.options.y = y;
         this.snake = null;
-        this.point = null;
         this.frame = null;
     }
     Frame.prototype = {
@@ -260,10 +263,12 @@
     };
     var Control = function(options) {
         var defaults = {
-            time: 500
-        };
-        var frame = new Frame();
-        var clock = null;
+                time: 500
+            },
+            frame = new Frame(),
+            clock = null,
+            space = 1,
+            _this = this;
         this.move = function() {
             clock = setInterval(
                 function() {
@@ -288,6 +293,8 @@
                     break;
                     //暂停
                 case 19:
+                case 32:
+                    Events.trigger('stop', _this);
                     break;
 
             }
@@ -316,6 +323,14 @@
         Events.on('over', function() {
             clearInterval(clock);
             over();
+        });
+        Events.on('stop', function() {
+            if (space % 2 === 0) {
+                this.move();
+            } else {
+                clearInterval(clock);
+            }
+            space++;
         });
         frame.create();
     };
