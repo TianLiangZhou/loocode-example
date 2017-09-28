@@ -2,6 +2,19 @@
  *
  */
 (function() {
+
+    var Events = {
+        on: function(type, callback, element) {
+            var e = element || window,
+                f = e.addEventListener || function(type, callback) {
+                    e.attachEvent('on' + type, callback);
+                };
+            f(type, callback);
+        },
+        trigger: function(type, object) {
+
+        }
+    };
     /**
      *
      * @type {HTMLCanvasElement}
@@ -16,11 +29,16 @@
     canvas.setAttribute('id', 'deskCanvas');
     canvas.setAttribute('width', width + "px");
     canvas.setAttribute('height',height + "px");
+    canvas.style.cursor = "pointer";
     desk.style.margin = "10px auto";
     desk.style.width = width + "px";
     desk.appendChild(canvas);
     document.body.insertBefore(desk, child);
-
+    var offsetCanvas = {
+        left: desk.offsetLeft,
+        top : desk.offsetTop
+    };
+    console.log(offsetCanvas);
     /**
      *
      * @type {CanvasRenderingContext2D|WebGLRenderingContext}
@@ -32,8 +50,9 @@
     ctx.strokeStyle = "#999";
     ctx.lineWidth = 1;
     ctx.beginPath();
+    var offset = 0;
     for (var i = 1; i <= 19; i++) {
-        var offset = i * size - size + radius;
+        offset = i * size - size + radius;
         ctx.moveTo(offset, radius);
         ctx.lineTo(offset, height - radius);
         ctx.moveTo(radius, offset);
@@ -41,24 +60,38 @@
     }
     ctx.stroke();
     ctx.closePath();
-    ctx.beginPath();
-    ctx.fillStyle = "#FFF";
-    ctx.arc(75, 75, radius, 0, 2 * Math.PI);
-    ctx.arc(75, 125, radius, 0, 2 * Math.PI);
-    ctx.fill();
-    ctx.closePath();
+    function Chess(color, x, y) {
+        ctx.beginPath();
+        ctx.fillStyle = color;
+        ctx.arc(x, y, radius, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.closePath();
+    }
 
-    ctx.beginPath();
-    ctx.fillStyle = "#000";
-    ctx.arc(125, 75, radius, 0, 2 * Math.PI);
-    ctx.arc(125, 125, radius, 0, 2 * Math.PI);
-    ctx.fill();
-    ctx.closePath();
-
-    ctx.beginPath();
-    ctx.fillStyle = "#000";
-    ctx.arc(475, 475, 300, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.closePath();
+    /**
+     *
+     * @param name
+     * @constructor
+     */
+    function Player(name, color) {
+        this.name = name;
+        this.position = [];
+        this.color = color;
+        this.state = 'playing';
+    }
+    Player.prototype = {
+        /**
+         *
+         */
+        chess: function() {
+            if (this.state === 'wait') {
+                return ;
+            }
+            var x, y;
+            Chess(this.color, x, y);
+            this.state = 'wait';
+            this.position.push([x, y]);
+        }
+    };
 
 }());
