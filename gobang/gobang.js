@@ -11,7 +11,7 @@
             return source;
         }
     };
-
+    var _listener = [];
     var Events = {
         on: function(type, callback, element) {
             var e = element || window,
@@ -19,9 +19,19 @@
                     e.attachEvent('on' + type, callback);
                 };
             f(type, callback);
+            _listener.push({
+                type: type, 
+                callback: callback    
+            });
         },
-        trigger: function(type, object) {
-
+        trigger: function(type, object, param) {
+            for(var i in _listener) {
+                var name = _listener[i].type,
+                    callback = _listener[i].callback;
+                if (name === type) {
+                    callback.call(object || window, param);
+                }         
+            }  
         }
     };
     var offsetCanvas = {
@@ -122,25 +132,45 @@
         }
     };
 
-    function Chess(color, desk) {
-        this.color = color;
+    function Chess(desk) {
+        var position = [];
         this.desk = desk;
-        this.position = [];
+        this.addPosition = function(point) {
+            for (var i in position) {
+                var p = position[i];
+                if (p.x == point.x && p.y == point.y) {
+                    return false;  
+                }       
+            }
+            position.push(point);   
+            return true;
+        };
+        this.getPosition = function() {
+            return position;
+        };
     }
     Chess.prototype = {
-        draw: function(point) {
+        draw: function(point, color) {
             var ctx = this.desk.getContext(),
-                radius = this.desk.getRadius();
-            point = this.roundCirclePoint(point);
-
+                radius = this.desk.getRadius(),
+                point = this.roundCirclePoint(point),
+                position = this.getPosition(),
+                i = 0,
+                len = position.length;
             if (typeof point[0] === "object") {
                 return this.noticeReact(point);
             }
+            for (;i < len; i++) {
+                if (position[i].x == point.x && position[i].y == point.y) {
+                    return null;
+                }
+            }
             ctx.beginPath();
-            ctx.fillStyle = this.color;
+            ctx.fillStyle = color;
             ctx.arc(point.x, point.y, radius, 0, 2 * Math.PI);
             ctx.fill();
             ctx.closePath();
+            this.addPosition(point);
             return point;
         },
         /**
@@ -211,38 +241,101 @@
          */
         render: function() {
             for (var i in this.position) {
-                this.chess.draw(this.position[i]);
+                this.chess.draw(this.position[i], this.color);
             }
         },
         /**
          *
          */
         playChess: function() {
-            if (this.state === 'waiting' || this.state === 'waitStart') {
+            if (this.state === 'waiting' || this.state === 'waitStart' || this.state === 'waitPlay') {
                 return ;
             }
             var point = this.getXY(),
-                circlePoint = this.chess.draw(point);
-            //this.state = 'waiting';
+                circlePoint = this.chess.draw(point, this.color);
             if (circlePoint !== null) {
-                this.position.push(point);
+                if (this.addPosition(point)) {
+                    Events.trigger("notify", ctrl, this);
+                }
+            } else {
+                this.updateState("waitPlay");
+            } 
+        },
+        updateState: function(state) {
+            this.state = state;
+        },
+        getState: function() {
+            return this.state; 
+        },
+        addPosition: function(point) {
+            for (var i in this.position) {
+                var p = this.position[i];
+                if (p.x == point.x && p.y == point.y) {
+                    return false;  
+                }       
+            }
+            this.position.push(point);   
+            return true;
+        },
+        checkOver: function() {
+                  
+        }
+    };
+    function Control() {
+        this.player = [];        
+    };
+    Control.prototype = {
+        addPlayer: function(player) {
+            this.player.push(player);
+        },
+        getPlaying: function() {
+            for (var i in this.player) {
+                var state = this.player[i].getState();
+                if (state === 'waitPlay') {
+                    return this.player[i];
+                }
+            }   
+            var player = this.player[0];
+            player.updateState("waitPlay");
+            return player;
+        },
+        notify: function(player) {
+            for (var i in this.player) {
+                if (this.player[i] != player) {
+                    this.player[i].updateState("waitPlay");
+                } else {
+                    this.player[i].updateState("waiting");
+                }
             }
         },
-        setState: function(state) {
-            this.state = state;
+        getPlayer: function() {
+            return this.player;
         }
     };
     var desk = new Desk(19);
-    var chess = new Chess("#FFF", desk);
-    var player = new Player();
-    player.setChess(chess);
+    var chess = new Chess(desk);
+    var playerOne = new Player("Tom", "#FFF");
+    var playerTwo = new Player("Seven", "#000");
+    var ctrl = new Control();
+    playerOne.setChess(chess);
+    playerTwo.setChess(chess);
+    ctrl.addPlayer(playerOne);
+    ctrl.addPlayer(playerTwo);
+
     Events.on('click', function(e) {
-        player.setState('playing');
+        var player = ctrl.getPlaying();
+        player.updateState("playing");
         player.setXY(e.offsetX, e.offsetY);
     }, desk.getCanvas());
+    Events.on("notify", function(player) {
+        ctrl.notify(player);
+    });
     setInterval(function() {
         desk.draw();
-        player.render();
-        player.playChess();
+        var player = ctrl.getPlayer();
+        for(var i in player) {
+            player[i].render();
+            player[i].playChess();
+        }
     }, 1000 / 30);
 }());
