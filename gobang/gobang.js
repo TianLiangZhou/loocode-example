@@ -150,7 +150,7 @@
         };
     }
     Chess.prototype = {
-        draw: function(point, color) {
+        draw: function(point, color, isPlayer) {
             var ctx = this.desk.getContext(),
                 radius = this.desk.getRadius(),
                 point = this.roundCirclePoint(point),
@@ -160,9 +160,11 @@
             if (typeof point[0] === "object") {
                 return this.noticeReact(point);
             }
-            for (;i < len; i++) {
-                if (position[i].x == point.x && position[i].y == point.y) {
-                    return null;
+            if (isPlayer === true) {
+                for (; i < len; i++) {
+                    if (position[i].x == point.x && position[i].y == point.y) {
+                        return null;
+                    }
                 }
             }
             ctx.beginPath();
@@ -241,7 +243,7 @@
          */
         render: function() {
             for (var i in this.position) {
-                this.chess.draw(this.position[i], this.color);
+                this.chess.draw(this.position[i], this.color, false);
             }
         },
         /**
@@ -252,7 +254,7 @@
                 return ;
             }
             var point = this.getXY(),
-                circlePoint = this.chess.draw(point, this.color);
+                circlePoint = this.chess.draw(point, this.color, true);
             if (circlePoint !== null) {
                 if (this.addPosition(point)) {
                     Events.trigger("notify", ctrl, this);
