@@ -257,8 +257,11 @@
                 circlePoint = this.chess.draw(point, this.color, true);
             if (circlePoint !== null) {
                 if (this.addPosition(circlePoint)) {
-                    this.checkOver(circlePoint);
-                    Events.trigger("notify", ctrl, this);
+                    if (this.checkOver(circlePoint)) {
+
+                    } else {
+                        Events.trigger("notify", ctrl, this);
+                    }
                 }
             } else {
                 this.updateState("waitPlay");
@@ -281,10 +284,9 @@
             return true;
         },
         checkOver: function(point) {
-            var position = this.position,
-                len = position.length,
+            var position = this.position.slice(0),
                 i = 0,
-                j = 1,
+                j = null,
                 first = null,
                 next = null,
                 size = this.chess.desk.getSize();
@@ -303,10 +305,11 @@
             }); */
 
             var x =[], y = [], slopeX = [], slopeY = [];
-            console.log(position);
+            position.pop();
+            var len = position.length;
             for(; i < len; i++) {
                 first = position[i];
-                for (;j <=4; j++) {
+                for (j = 1;j <=4; j++) {
                     if (
                         (first.x === point.x + (size * j) && first.y === point.y)
                         ||
@@ -317,7 +320,7 @@
                     if (
                         (first.y === point.y + (size * j) && first.x === point.x)
                         ||
-                        (first.y === point.y + (size * j) && first.x === point.x)
+                        (first.y === point.y - (size * j) && first.x === point.x)
                     ) {
                         y.push(j);
                     }
@@ -336,8 +339,11 @@
                         slopeX.push(j);
                     }
                 }
+                if (x.length >=4 || y.length >= 4 || slopeX.length >= 4 || slopeY.length >= 4) {
+                    return true;
+                }
             }
-            console.log(x, y, slopeX, slopeY);
+            return false;
         }
     };
     function Control() {
