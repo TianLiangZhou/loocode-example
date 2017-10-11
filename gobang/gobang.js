@@ -256,7 +256,8 @@
             var point = this.getXY(),
                 circlePoint = this.chess.draw(point, this.color, true);
             if (circlePoint !== null) {
-                if (this.addPosition(point)) {
+                if (this.addPosition(circlePoint)) {
+                    this.checkOver(circlePoint);
                     Events.trigger("notify", ctrl, this);
                 }
             } else {
@@ -272,15 +273,71 @@
         addPosition: function(point) {
             for (var i in this.position) {
                 var p = this.position[i];
-                if (p.x == point.x && p.y == point.y) {
+                if (p.x === point.x && p.y === point.y) {
                     return false;  
                 }       
             }
             this.position.push(point);   
             return true;
         },
-        checkOver: function() {
-                  
+        checkOver: function(point) {
+            var position = this.position,
+                len = position.length,
+                i = 0,
+                j = 1,
+                first = null,
+                next = null,
+                size = this.chess.desk.getSize();
+            /**
+            position.sort(function(prev, next) {
+                var value = (prev.x + prev.y) - (next.x + next.y);
+                if (value === 0) {
+                    if (prev.x - prev.y === 0) {
+                        return -1;
+                    }
+                    if (next.x - next.y === 0) {
+                        return 1;
+                    }
+                }
+                return value;
+            }); */
+
+            var x =[], y = [], slopeX = [], slopeY = [];
+            console.log(position);
+            for(; i < len; i++) {
+                first = position[i];
+                for (;j <=4; j++) {
+                    if (
+                        (first.x === point.x + (size * j) && first.y === point.y)
+                        ||
+                        (first.x === point.x - (size * j) && first.y === point.y)
+                    ) {
+                        x.push(j);
+                    }
+                    if (
+                        (first.y === point.y + (size * j) && first.x === point.x)
+                        ||
+                        (first.y === point.y + (size * j) && first.x === point.x)
+                    ) {
+                        y.push(j);
+                    }
+                    if (
+                        (first.x === point.x + (size * j) && first.y === point.y + (size * j))
+                            ||
+                        (first.x === point.x - (size * j) && first.y === point.y - (size * j))
+                        ) {
+                        slopeX.push(j);
+                    }
+                    if (
+                        (first.x === point.x + (size * j) && first.y === point.y - (size * j))
+                            ||
+                        (first.x === point.x - (size * j) && first.y === point.y + (size * j))
+                        ) {
+                        slopeX.push(j);
+                    }
+                }
+            }
+            console.log(x, y, slopeX, slopeY);
         }
     };
     function Control() {
