@@ -258,7 +258,7 @@
             if (circlePoint !== null) {
                 if (this.addPosition(circlePoint)) {
                     if (this.checkOver(circlePoint)) {
-
+                        alert("游戏结束")
                     } else {
                         Events.trigger("notify", ctrl, this);
                     }
@@ -288,23 +288,8 @@
                 i = 0,
                 j = null,
                 first = null,
-                next = null,
-                size = this.chess.desk.getSize();
-            /**
-            position.sort(function(prev, next) {
-                var value = (prev.x + prev.y) - (next.x + next.y);
-                if (value === 0) {
-                    if (prev.x - prev.y === 0) {
-                        return -1;
-                    }
-                    if (next.x - next.y === 0) {
-                        return 1;
-                    }
-                }
-                return value;
-            }); */
-
-            var x =[], y = [], slopeX = [], slopeY = [];
+                size = this.chess.desk.getSize(),
+                x = y = slopeX = slopeY = 0;
             position.pop();
             var len = position.length;
             for(; i < len; i++) {
@@ -315,31 +300,34 @@
                         ||
                         (first.x === point.x - (size * j) && first.y === point.y)
                     ) {
-                        x.push(j);
+                        x++;
+                        continue;
                     }
                     if (
                         (first.y === point.y + (size * j) && first.x === point.x)
                         ||
                         (first.y === point.y - (size * j) && first.x === point.x)
                     ) {
-                        y.push(j);
+                        y++;
+                        continue;
                     }
                     if (
                         (first.x === point.x + (size * j) && first.y === point.y + (size * j))
                             ||
                         (first.x === point.x - (size * j) && first.y === point.y - (size * j))
                         ) {
-                        slopeX.push(j);
+                        slopeX++;
+                        continue;
                     }
                     if (
                         (first.x === point.x + (size * j) && first.y === point.y - (size * j))
                             ||
                         (first.x === point.x - (size * j) && first.y === point.y + (size * j))
                         ) {
-                        slopeX.push(j);
+                        slopeY++;
                     }
                 }
-                if (x.length >=4 || y.length >= 4 || slopeX.length >= 4 || slopeY.length >= 4) {
+                if (x >=4 || y >= 4 || slopeX >= 4 || slopeY >= 4) {
                     return true;
                 }
             }
