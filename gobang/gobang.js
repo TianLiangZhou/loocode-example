@@ -134,45 +134,48 @@
 
     function Chess(desk) {
         var position = [];
+        this.standard = desk.getOption('standard') - 1;
+        this.size     = desk.getSize();
         this.desk = desk;
-        this.addPosition = function(point) {
-            for (var i in position) {
-                var p = position[i];
-                if (p.x == point.x && p.y == point.y) {
-                    return false;  
-                }       
+        for (var y = 0; y <= this.standard; y++) {
+            position[y] = [];
+            for (var x = 0; x <= this.standard; x++) {
+                position[y][x] = null;
             }
-            position.push(point);   
+        }
+        this.addPosition = function(object) {
+            var x = Math.floor(object.point.x / this.size),
+                y = Math.floor(object.point.y / this.size);
+            if (position[y][x] !== null) {
+                return false;
+            }
+            position[y][x] = object;
             return true;
         };
         this.getPosition = function() {
             return position;
         };
+        this.ctx = this.desk.getContext();
+        this.radius = this.desk.getRadius();
     }
     Chess.prototype = {
-        draw: function(point, color, isPlayer) {
-            var ctx = this.desk.getContext(),
-                radius = this.desk.getRadius(),
-                point = this.roundCirclePoint(point),
-                position = this.getPosition(),
-                i = 0,
-                len = position.length;
+        draw: function(player) {
+            var point = this.roundCirclePoint(player.getXY());
             if (typeof point[0] === "object") {
                 return this.noticeReact(point);
             }
-            if (isPlayer === true) {
-                for (; i < len; i++) {
-                    if (position[i].x == point.x && position[i].y == point.y) {
-                        return null;
-                    }
-                }
+            var object = {player: player, point: point};
+            if (!this.addPosition(object)) {
+                return null;
             }
-            ctx.beginPath();
-            ctx.fillStyle = color;
-            ctx.arc(point.x, point.y, radius, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.closePath();
-            this.addPosition(point);
+            this.ctx.beginPath();
+            this.ctx.fillStyle = player.color;
+            this.ctx.arc(point.x, point.y, this.radius, 0, 2 * Math.PI);
+            this.ctx.fill();
+            this.ctx.closePath();
+            if (this.over(object)) {
+                alert("玩家：" + player.name + "获得胜利");
+            }
             return point;
         },
         /**
@@ -180,23 +183,18 @@
          * @param points
          */
         noticeReact: function(points) {
-            var ctx = this.desk.getContext(),
-                size= this.desk.getSize(),
-                radius = this.desk.getRadius();
-                ctx.strokeStyle = "#f4645f";
+            this.ctx.strokeStyle = "#f4645f";
             for (var i in points) {
                 var m = points[i];
-                ctx.strokeRect(
-                    m.x - (radius / 2), m.y - (radius / 2), size - radius, size - radius
+                this.ctx.strokeRect(
+                    m.x - (this.radius / 2), m.y - (this.radius / 2), this.size - this.radius, this.size - this.radius
                 );
             }
             return null;
         },
         roundCirclePoint: function(point) {
-            var radius = this.desk.getRadius(),
-                size = this.desk.getSize(),
-                x = Math.floor((point.x - radius) / size),
-                y = Math.floor((point.y - radius) / size),
+            var x = Math.floor((point.x - this.radius) / this.size),
+                y = Math.floor((point.y - this.radius) / this.size),
                 circle = [];
             if (x < 0) x = 0;
             if (y < 0) y = 0;
@@ -204,19 +202,62 @@
             for(var i = x; i <= x+1; i++) {
                 for(var j = y; j <= y+1; j++) {
                     circle.push({
-                        x: i * 50 + radius,
-                        y: j * 50 + radius
+                        x: i * 50 + this.radius,
+                        y: j * 50 + this.radius
                     });
                 }
             }
             for (var index in circle) {
                 var m = circle[index];
                 var distance = Math.pow(m.x - point.x, 2) + Math.pow(m.y - point.y, 2);
-                if (distance < Math.pow(radius, 2)) {
+                if (distance < Math.pow(this.radius, 2)) {
                     return m;
                 }
             }
             return circle;
+        },
+        over: function(object) {
+            var player = object.player,
+                point  = object.point,
+                x = Math.floor(point.x / this.size),
+                y = Math.floor(point.y / this.size),
+                position = this.getPosition(),
+                hx = vy = sh = sv = _hx = _vy = _sh = _sv = 0;
+            for (var i = 1; i <= 4; i++) {
+                if (x+i < this.standard && position[y][x+i] && position[y][x+i].player === player && (i - hx) === 1) {
+                    hx++;
+                    continue;
+                }
+                if (y+i < this.standard && position[y+i][x] && position[y+i][x].player === player && (i - vy) === 1) {
+                    vy++;
+                    continue;
+                }
+                if (y+i < this.standard && x+i < this.standard && position[y+i][x+i] && position[y+i][x+i].player === player && (i - sv) === 1) {
+                    sv++;
+                    continue;
+                }
+                if (y+i < this.standard && x-i > -1 && position[y+i][x-i] && position[y+i][x-i].player === player && (i - sh) === 1) {
+                    sh++;
+                }
+            }
+            for (var i = -1; i >= -4; i--) {
+                if (x+i > -1 && position[y][x+i] && position[y][x+i].player === player && (i + _hx) === -1) {
+                    _hx++;
+                     continue;
+                }
+                if (y+i > -1 && position[y+i][x] && position[y+i][x].player === player && (i + _vy) === -1) {
+                    _vy++;
+                    continue;
+                }
+                if (y+i > -1 && x+i > -1 && position[y+i][x+i] && position[y+i][x+i].player === player && (i + _sv) === -1) {
+                    _sv++;
+                    continue;
+                }
+                if (y+i > -1 && x-i < this.standard && position[y+i][x-i] && position[y+i][x-i].player === player && (i + _sh) === -1) {
+                    _sh++;
+                }
+            }
+            return hx + _hx >= 4 || vy + _vy >= 4 || sv + _sv >= 4 || sh + _sh >= 4;
         }
     };
     /**
@@ -224,28 +265,16 @@
      * @param name
      * @constructor
      */
-    function Player(name, color) {
+    function Player(name, color, chess) {
         this.name = name;
-        this.position = [];
         this.color = color;
         this.state = 'waitStart';
         var x = y = 0;
         this.setXY = function(xv, yv) {x = xv; y = yv;};
         this.getXY = function() {return {x: x, y: y};};
-        this.chess = null;
-        this.setChess = function(chess) {
-            this.chess = chess;
-        };
+        this.chess = chess;
     }
     Player.prototype = {
-        /**
-         *
-         */
-        render: function() {
-            for (var i in this.position) {
-                this.chess.draw(this.position[i], this.color, false);
-            }
-        },
         /**
          *
          */
@@ -253,16 +282,9 @@
             if (this.state === 'waiting' || this.state === 'waitStart' || this.state === 'waitPlay') {
                 return ;
             }
-            var point = this.getXY(),
-                circlePoint = this.chess.draw(point, this.color, true);
+            var circlePoint = this.chess.draw(this);
             if (circlePoint !== null) {
-                if (this.addPosition(circlePoint)) {
-                    if (this.checkOver(circlePoint)) {
-                        alert("游戏结束")
-                    } else {
-                        Events.trigger("notify", ctrl, this);
-                    }
-                }
+                Events.trigger("notify", ctrl, this);
             } else {
                 this.updateState("waitPlay");
             } 
@@ -272,66 +294,6 @@
         },
         getState: function() {
             return this.state; 
-        },
-        addPosition: function(point) {
-            for (var i in this.position) {
-                var p = this.position[i];
-                if (p.x === point.x && p.y === point.y) {
-                    return false;  
-                }       
-            }
-            this.position.push(point);   
-            return true;
-        },
-        checkOver: function(point) {
-            var position = this.position.slice(0),
-                i = 0,
-                j = null,
-                first = null,
-                size = this.chess.desk.getSize(),
-                x = y = slopeX = slopeY = 0;
-            position.pop();
-            var len = position.length;
-            for(; i < len; i++) {
-                first = position[i];
-                for (j = 1;j <=4; j++) {
-                    if (
-                        (first.x === point.x + (size * j) && first.y === point.y)
-                        ||
-                        (first.x === point.x - (size * j) && first.y === point.y)
-                    ) {
-                        x++;
-                        continue;
-                    }
-                    if (
-                        (first.y === point.y + (size * j) && first.x === point.x)
-                        ||
-                        (first.y === point.y - (size * j) && first.x === point.x)
-                    ) {
-                        y++;
-                        continue;
-                    }
-                    if (
-                        (first.x === point.x + (size * j) && first.y === point.y + (size * j))
-                            ||
-                        (first.x === point.x - (size * j) && first.y === point.y - (size * j))
-                        ) {
-                        slopeX++;
-                        continue;
-                    }
-                    if (
-                        (first.x === point.x + (size * j) && first.y === point.y - (size * j))
-                            ||
-                        (first.x === point.x - (size * j) && first.y === point.y + (size * j))
-                        ) {
-                        slopeY++;
-                    }
-                }
-                if (x >=4 || y >= 4 || slopeX >= 4 || slopeY >= 4) {
-                    return true;
-                }
-            }
-            return false;
         }
     };
     function Control() {
@@ -354,7 +316,7 @@
         },
         notify: function(player) {
             for (var i in this.player) {
-                if (this.player[i] != player) {
+                if (this.player[i] !== player) {
                     this.player[i].updateState("waitPlay");
                 } else {
                     this.player[i].updateState("waiting");
@@ -367,28 +329,19 @@
     };
     var desk = new Desk(19);
     var chess = new Chess(desk);
-    var playerOne = new Player("Tom", "#FFF");
-    var playerTwo = new Player("Seven", "#000");
+    var playerOne = new Player("Tom", "#FFF", chess);
+    var playerTwo = new Player("Seven", "#000", chess);
     var ctrl = new Control();
-    playerOne.setChess(chess);
-    playerTwo.setChess(chess);
     ctrl.addPlayer(playerOne);
     ctrl.addPlayer(playerTwo);
-
+    desk.draw();
     Events.on('click', function(e) {
         var player = ctrl.getPlaying();
         player.updateState("playing");
         player.setXY(e.offsetX, e.offsetY);
+        player.playChess();
     }, desk.getCanvas());
     Events.on("notify", function(player) {
         ctrl.notify(player);
     });
-    setInterval(function() {
-        desk.draw();
-        var player = ctrl.getPlayer();
-        for(var i in player) {
-            player[i].render();
-            player[i].playChess();
-        }
-    }, 1000 / 30);
 }());
