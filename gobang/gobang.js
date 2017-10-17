@@ -101,23 +101,29 @@
             /**
              *
              * @type {CanvasRenderingContext2D|WebGLRenderingContext}
+             * @see https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D
              */
             var ctx = this.getContext(),
                 offset = 0,
                 size = this.getOption('size'),
                 radius = this.getRadius(),
                 width = this.getOption('width'),
-                height = this.getOption('height');
+                height = this.getOption('height'),
+                standard = this.getOption('standard');
             this.setContext(ctx);
+            //设置填充颜色
             ctx.fillStyle = "#f6f2e9";
+            //使用fillStyle设置的颜色来填充矩形区域
             ctx.fillRect(0, 0, this.getOption("width"), this.getOption("height"));
-            ctx.strokeStyle = "#999";
+            ctx.strokeStyle = "#999"; //线条颜色
             ctx.lineWidth = 1;
             ctx.beginPath();
-            for (var i = 1; i <= 19; i++) {
+            for (var i = 1; i <= standard; i++) {
                 offset = i * size - size + radius;
+                //绘制竖线
                 ctx.moveTo(offset, radius);
                 ctx.lineTo(offset, height - radius);
+                //绘制横线
                 ctx.moveTo(radius, offset);
                 ctx.lineTo(width - radius, offset);
             }
@@ -159,6 +165,11 @@
         this.radius = this.desk.getRadius();
     }
     Chess.prototype = {
+        /**
+         * 绘制棋子
+         * @param player
+         * @returns {*}
+         */
         draw: function(player) {
             var point = this.roundCirclePoint(player.getXY());
             if (typeof point[0] === "object") {
@@ -192,6 +203,12 @@
             }
             return null;
         },
+
+        /**
+         * 转换坐标
+         * @param point
+         * @returns {*}
+         */
         roundCirclePoint: function(point) {
             var x = Math.floor((point.x - this.radius) / this.size),
                 y = Math.floor((point.y - this.radius) / this.size),
@@ -210,12 +227,19 @@
             for (var index in circle) {
                 var m = circle[index];
                 var distance = Math.pow(m.x - point.x, 2) + Math.pow(m.y - point.y, 2);
+                //计算点是否在圆内
                 if (distance < Math.pow(this.radius, 2)) {
                     return m;
                 }
             }
             return circle;
         },
+        /**
+         * 判断游戏结束
+         * 通过判断当前棋子的八向连续相同的四子，或者正反方向的连续相同的棋子的和大于四
+         * @param object
+         * @returns {boolean}
+         */
         over: function(object) {
             var player = object.player,
                 point  = object.point,
@@ -226,15 +250,12 @@
             for (var i = 1; i <= 4; i++) {
                 if (x+i < this.standard && position[y][x+i] && position[y][x+i].player === player && (i - hx) === 1) {
                     hx++;
-                    continue;
                 }
                 if (y+i < this.standard && position[y+i][x] && position[y+i][x].player === player && (i - vy) === 1) {
                     vy++;
-                    continue;
                 }
                 if (y+i < this.standard && x+i < this.standard && position[y+i][x+i] && position[y+i][x+i].player === player && (i - sv) === 1) {
                     sv++;
-                    continue;
                 }
                 if (y+i < this.standard && x-i > -1 && position[y+i][x-i] && position[y+i][x-i].player === player && (i - sh) === 1) {
                     sh++;
@@ -243,15 +264,12 @@
             for (var i = -1; i >= -4; i--) {
                 if (x+i > -1 && position[y][x+i] && position[y][x+i].player === player && (i + _hx) === -1) {
                     _hx++;
-                     continue;
                 }
                 if (y+i > -1 && position[y+i][x] && position[y+i][x].player === player && (i + _vy) === -1) {
                     _vy++;
-                    continue;
                 }
                 if (y+i > -1 && x+i > -1 && position[y+i][x+i] && position[y+i][x+i].player === player && (i + _sv) === -1) {
                     _sv++;
-                    continue;
                 }
                 if (y+i > -1 && x-i < this.standard && position[y+i][x-i] && position[y+i][x-i].player === player && (i + _sh) === -1) {
                     _sh++;
