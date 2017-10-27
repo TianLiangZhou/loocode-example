@@ -1,0 +1,64 @@
+{
+    "manifest_version": 2, //扩展使用的Manifest 版本, 1是chrome版本低于17才使用.目前注流都是用2
+
+    "name": "ImageSource", //扩展名称 
+    "version": "1.0", //扩展版本
+    "description": "显示页面所有图片的源地址", //扩展描述
+
+
+    //设置扩展将在地址右侧显示扩展图标，弹出窗，提示等
+    //@see https://developer.chrome.com/extensions/browserAction
+    //当你的扩展是针对某些页面操作的话，你应该使用page_action
+    /**
+    "browser_action": {
+        "default_icon": {                    // 设置ICON，不同大小，浏览会选择显示那种ICON
+            "16": "images/icon16.png",           
+            "24": "images/icon24.png",           
+            "32": "images/icon32.png"            
+        },
+        "default_title": "Google Mail",      // 设置默认的标题
+        "default_popup": "popup.html"        // 设置默认的弹出层页面
+    },
+    */
+
+    "page_action": {
+        "default_icon": "images/icon-32.png",                    // 设置ICON，不同大小，浏览会选择显示那种ICON
+        "default_title": "图片源",      // 设置默认的标题
+        "default_popup": "popup.html"        // 设置默认的弹出层页面
+    },
+
+    "icons": {
+        "48": "images/icon-48.png",
+        "128": "images/icon-128.png"
+    },
+    
+    //运行于后台的实例, 后台实例是一直在运行中，打开浏览器只执行一次实例
+    //官方推荐使用事件页面代替背景页面
+    //@see 
+    "background": {
+        //"page": "background.html",
+        "scripts": [
+            "js/background.js"
+        ],
+        "persistent": false 
+    },
+    //页面脚本注入
+    "content_scripts": [
+        {
+            "matches": ["http://*/*", "https://*/*"],
+            "js": ["js/content.js"]
+        }
+    ],
+    //扩展权限
+    //@see https://developer.chrome.com/extensions/declare_permissions 权限列表文档
+    "permissions": [
+        "background", 
+        "tabs", 
+        //"webRequest",
+        "activeTab", 
+        "http://*/*",
+        "https://*/*"
+    ],
+    "author": "骑驴找蚂蚁", //开发者
+    "homepage_url": "http://loocode.com" //项目主页
+}
