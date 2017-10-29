@@ -1,9 +1,15 @@
 window.onload = function(e) {
     var content = document.body.innerHTML;
     var sheet = document.styleSheets;
+    var href = [];
+    for (var key in sheet) {
+        if (sheet[key].href != null) {
+            href.push(sheet[key].href);
+        }
+    }
     chrome.runtime.sendMessage({
         type: "content",
-        sheet: sheet,
+        sheet: href,
         url: location.href
     });
 }

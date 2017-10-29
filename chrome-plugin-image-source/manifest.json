@@ -54,7 +54,6 @@
     "permissions": [
         "background", 
         "tabs", 
-        //"webRequest",
         "activeTab", 
         "http://*/*",
         "https://*/*"

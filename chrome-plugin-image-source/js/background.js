@@ -1,8 +1,8 @@
 var url = {},
-hashCode = function(){
+hashCode = function(url) {
     var hash = 0;
-    for (var i = 0; i < this.length; i++) {
-        var character = this.charCodeAt(i);
+    for (var i = 0; i < url.length; i++) {
+        var character = url.charCodeAt(i);
         hash = ((hash<<5)-hash)+character;
         hash = hash & hash; // Convert to 32bit integer
     }
@@ -15,9 +15,8 @@ hashCode = function(){
 chrome.pageAction.onClicked.addListener(function(tab) {
     // No tabs or host permissions needed!
     var hash = hashCode(tab.url);
-    alert(url[hash]);
 });
-**/
+*/
 
 /**
  * @see https://developer.chrome.com/extensions/tabs#on-removed
@@ -53,6 +52,8 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
  */
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     var code = hashCode(message.url);
+    console.log(message.url);
+    console.log(code);
     if (message.type === 'content') {
         if (url.hasOwnProperty(code) === false) {
             url[code] = message.sheet;
@@ -60,4 +61,5 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     } else if (message.type === 'popup') {
         sendResponse({sheet: url[code]});  
     }
+    console.log(url);
 });
