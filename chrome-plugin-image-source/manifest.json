@@ -1,9 +1,9 @@
 {
-    "manifest_version": 2, //扩展使用的Manifest 版本, 1是chrome版本低于17才使用.目前注流都是用2
+    "manifest_version": 2, //扩展使用的Manifest 版本, 1是chrome版本低于17才使用.目前主流都是用2
 
     "name": "ImageSource", //扩展名称 
     "version": "1.0", //扩展版本
-    "description": "显示页面所有图片的源地址", //扩展描述
+    "description": "抓取当前页面样式文件中的所有图片源地址", //扩展描述
 
 
     //设置扩展将在地址右侧显示扩展图标，弹出窗，提示等
