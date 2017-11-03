@@ -1,3 +1,7 @@
+
+/**
+ * 绑定页面载入后将sheets信息发送给background
+ */
 window.onload = function(e) {
     var content = document.body.innerHTML;
     var sheet = document.styleSheets;

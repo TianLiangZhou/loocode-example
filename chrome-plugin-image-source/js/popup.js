@@ -44,6 +44,11 @@ function ajax(url) {
     xhr.send();
 }
 
+/**
+ * 查找当前窗口活动的tab，并发送消息给backgorund.js取得页面的sheet表, 
+ * 再依次请求CSS文件获取内容读出图片地址，显示在popup.html。
+ * @param {*} tabs 
+ */
 function callback(tabs) {
     tab = tabs[0]; // there will be only one in this array
     chrome.runtime.sendMessage({
@@ -56,6 +61,4 @@ function callback(tabs) {
         }
     });
 }
-
-
 chrome.tabs.query(query, callback);
