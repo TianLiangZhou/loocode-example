@@ -1,0 +1,10 @@
+{
+    "require": {
+        "symfony/event-dispatcher": "^3.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Hummer\\": "./src"
+        }
+    }
+}
