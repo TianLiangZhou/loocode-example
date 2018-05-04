@@ -5,9 +5,12 @@ require __DIR__ . '/vendor/autoload.php';
 
 $config = [];
 
+$config['setting'] = [
+    'document_root' => __DIR__,
+    'task_worker_num' => 1,
+];
 $config['server'] = 'webSocket';
 //$config['is_open_http'] = true;
-$config['setting']['document_root'] = __DIR__;
 
 $app = new \Surf\Application(__DIR__, [
     'app.config' => $config
