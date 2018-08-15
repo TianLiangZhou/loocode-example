@@ -10,6 +10,9 @@
             if (host !== "example.loocode.com") {
                 host = "192.168.56.101";
             }
+            if (location.protocol === "https:") {
+                return new WebSocket("wss://" + host + "/websocket");
+            }
             return new WebSocket("ws://" + host + ":9527");
         };
 
