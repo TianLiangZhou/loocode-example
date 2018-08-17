@@ -1,5 +1,8 @@
 <?php
 
+use Landowner\HeartbeatTicker;
+use Surf\Provider\RedisServiceProvider;
+
 require __DIR__ . '/vendor/autoload.php';
 
 
@@ -16,7 +19,9 @@ $app = new \Surf\Application(__DIR__, [
     'app.config' => $config
 ]);
 
-$app->register(new \Surf\Provider\RedisServiceProvider());
+$app->addTicker(1000, HeartbeatTicker::class)->register(
+    new RedisServiceProvider()
+);
 
 include __DIR__ . '/protocol.php';
 

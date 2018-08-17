@@ -1,8 +1,5 @@
 (function(global) {
 
-
-
-
     function Socket() {
         var isConnection = false, _this = this;
         var connection = function() {
@@ -57,6 +54,11 @@
         };
         this.isConnected = function() {
             return isConnection;
+        };
+        this.close = function() {
+            if (this.isConnected()) {
+                this.socket.close();
+            }
         };
         this.requestCallback = {};
         this.listeners = {};
@@ -172,6 +174,19 @@
                _this.initRender(_this);
             });
             this.socket.reconnect();
+            this.listenClose();
+        },
+        listenClose: function() {
+            window.addEventListener("beforeunload", function (e) {
+                var confirmationMessage = "确定关闭";
+                (e || window.event).returnValue = confirmationMessage;
+                return confirmationMessage;
+            });
+            window.addEventListener("unload", function (e) {
+                var confirmationMessage = "确定关闭";
+                (e || window.event).returnValue = confirmationMessage;
+                return confirmationMessage;
+            });
         },
         readyWorker: function (offset, state, playId) {
             var _this = this;
