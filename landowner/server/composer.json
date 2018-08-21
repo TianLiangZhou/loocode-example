@@ -1,10 +1,16 @@
 {
-  "require": {
-    "meshell/surf": "^1.0.5"
-  },
   "autoload": {
     "psr-4": {
       "Landowner\\": "./app"
     }
+  },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/TianLiangZhou/surf"
+    }
+  ],
+  "require": {
+    "meshell/surf": "dev-master"
   }
 }

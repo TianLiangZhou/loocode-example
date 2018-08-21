@@ -153,22 +153,74 @@ class LandownerController extends WebSocketController
                             'content' => json_encode(["listen" => "assignPoker", "content" => $playerInfo])
                         ], PushTaskHandle::class);
                     }
+                    $isGrab = true;
                 }
             }
         }
         return [
             "flag" => 0,
+            "grab" => isset($isGrab) ? 1 : 0,
             "requestId" => $body->requestId,
         ];
     }
 
-
-    public function grabLandowner()
+    /**
+     * 抢地主
+     *
+     */
+    public function grabLandowner($body)
     {
+        if (!$this->redis->sIsMember(RedisConstant::FULL_CONNECT_FD, $this->frame->fd)) {
+            return [
+                "flag" => 500,
+                "requestId" => $body->requestId,
+            ];
+        }
 
+        $playId = $body->playId; //当前局
+
+        if ($body->grab) {
+
+            $poker = json_decode($this->redis->hGet(sprintf(self::PLAYER_INFO, $playId), 'poker'), true);
+
+            $landowner = json_decode($this->redis->hGet(sprintf(self::PLAYER_INFO, $playId), 'luck_poker'), true);
+
+            $poker[$this->frame->fd] = array_merge($poker[$this->frame->fd], $landowner);
+
+            return [
+                "flag" => 0,
+                "requestId" => $body->requestId,
+            ];
+        }
+
+        $players = $this->redis->sMembers(RedisConstant::FULL_CONNECT_FD);
+
+        $currentPos = 0;
+        foreach ($players as $key => $player) {
+            if ($player == $this->frame->fd) {
+                $currentPos = $key;
+            }
+        }
+        if ($currentPos == count($players) - 1) {
+            $currentPos = 0;
+        } else {
+            $currentPos += 1;
+        }
+        $this->container->get('server')->getServer()->push($players[$currentPos], json_encode([
+            "listen" => "grabLandowner",
+            "content" => "grabLandowner",
+        ]));
+        return [
+            "flag" => 500,
+            "requestId" => $body->requestId,
+        ];
     }
 
-    public function putPoker()
+    /**
+     * 出牌
+     *
+     */
+    public function putPoker($body)
     {
 
     }

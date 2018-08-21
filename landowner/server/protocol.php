@@ -18,3 +18,13 @@ $app->addProtocol(
     'player.ready',
     LandownerController::class . ':ready'
 );
+
+$app->addProtocol(
+    'player.grab',
+    LandownerController::class . ':grabLandowner'
+);
+
+$app->addProtocol(
+    'player.poker',
+    LandownerController::class . ':putPoker'
+);

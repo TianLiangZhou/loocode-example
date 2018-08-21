@@ -9,8 +9,8 @@
 namespace Landowner;
 
 
+use Landowner\Protocol\LandownerController;
 use Surf\Server\RedisConstant;
-use Surf\Server\WebSocket\WebSocketServer;
 use Surf\Ticker\Ticker;
 
 class HeartbeatTicker extends Ticker
@@ -22,7 +22,6 @@ class HeartbeatTicker extends Ticker
     public function execute()
     {
         // TODO: Implement execute() method.
-        echo "clear fd";
         /**
          * @var $redis Redis|\Redis
          */
@@ -43,6 +42,8 @@ class HeartbeatTicker extends Ticker
                 if (!$isSend) {
                     $redis->sRem(RedisConstant::FULL_CONNECT_FD, $fd);
                     $redis->hDel(RedisConstant::FULL_FD_WORKER, $fd);
+                    $redis->hDel(LandownerController::READY_KEY, $fd);
+                    echo "clear fd:", $fd, "\n";
                 }
             }
         }
