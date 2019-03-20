@@ -1,0 +1,19 @@
+<section class="todo">
+  <header>
+    <h1>Todo</h1>
+    <input autofocus type="text" name="todo" class="todo-input" [(ngModel)]="todo" (keyup)="enter($event)" placeholder="尝试输入些文字">
+  </header>
+  <section class="todo-main">
+    <ul class="todo-list">
+      <li *ngFor="let item of list; let i = index;">
+        <div>
+          <label>{{ item }}</label>
+          <button (click)="delete(i)"></button>
+        </div>
+      </li>
+    </ul>
+  </section>
+  <footer *ngIf="count" class="footer">
+    <span class="todo-count"><strong>{{ count }}</strong> 个元素</span>
+  </footer>
+</section>
