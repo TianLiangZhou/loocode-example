@@ -1,0 +1,27 @@
+<section class="demo">
+  <header>
+    <h1>Checkbox</h1>
+  </header>
+  <section class="main">
+   <form [formGroup]="form" (submit)="submit($event)">
+    <div class="form-group-inline">
+      <label>商品属性: </label>
+      <div class="control-group-inline">
+        <div formArrayName="labels" *ngFor="let label of form.controls.labels['controls']; let i = index;" class="checkbox-group">
+            <input type="checkbox" id="label{{ i }}" [formControlName]="i" />
+            <label for="label{{ i }}">{{ labels[i].name }}</label>
+        </div>
+      </div>
+    </div>
+    <div class="form-group text-center">
+        <button class="btn btn-danger" type="submit">更新</button>
+    </div>
+  </form>
+  <div class="content">
+    您选择结果: <span *ngFor="let item of selected;">{{ item }}&nbsp;&nbsp;</span>
+  </div>
+  </section>
+  <footer *ngIf="count" class="footer">
+    <span class="checkbox-count"><strong>{{ count }}</strong> checkbox</span>
+  </footer>
+</section>
