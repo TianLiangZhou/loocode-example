@@ -35,6 +35,7 @@ export class AppComponent {
       });
       this.count = this.labels.length;
     });
+    this.titleService.setTitle(this.title);
   }
 
   getLabels() {
