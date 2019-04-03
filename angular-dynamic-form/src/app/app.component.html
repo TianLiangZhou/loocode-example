@@ -1,0 +1,50 @@
+<section class="demo">
+  <header>
+    <h1>Form</h1>
+  </header>
+  <section class="main">
+    <form (submit)="submit()">
+      <ng-container *ngFor="let item of formJson; let i = index;">
+
+        <ng-template [ngIf]="!isArray(item.value) && !isObject(item.value)">
+          <div class="form-group row">
+            <label class="col-3" for="input{{ item.key | titlecase }}">{{ item.description }}: </label>
+            <div class="col-6">
+              <input type="text" [(ngModel)]="formJson[i].value" name="{{ item.key }}" value="{{ item.value }}"  class="form-control" id="input{{ item.key | titlecase }}">
+            </div>
+          </div>
+        </ng-template>
+        <ng-template [ngIf]="isObject(item.value)">
+          <div class="form-group row" *ngFor="let key of objectKeys(item.value); first as isFirst;">
+            <label class="col-3"><ng-template [ngIf]="isFirst">{{ item.description }}: </ng-template></label>
+            <div class="col-2">
+              <input type="text" disabled value="{{ key }}"  class="form-control">
+            </div>
+            <div class="col-4 m-x-1">
+              <input type="text" [(ngModel)]="formJson[i].value[key]" name="{{ item.key + '_' + key }}" value="{{ item.value[key] }}"  class="form-control">
+            </div>
+          </div>
+        </ng-template>
+        <ng-template [ngIf]="isArray(item.value)">
+          <div class="form-group row" *ngFor="let element of item.value; first as isFirst;let j = index;">
+            <label class="col-3"><ng-template [ngIf]="isFirst">{{ item.description }}: </ng-template></label>
+            <div class="col-4">
+              <input type="text" class="form-control" [(ngModel)]="formJson[i].value[j]"  name="{{ item.key + j }}" value="{{ element }}" />
+            </div>
+          </div>
+        </ng-template>
+
+      </ng-container>
+
+      <div class="form-group text-center">
+        <button class="btn btn-danger" type="submit">更新</button>
+      </div>
+    </form>
+    <div class="content" *ngIf="content">
+      {{ content }}
+    </div>
+  </section>
+  <footer *ngIf="count" class="footer">
+    <span class="checkbox-count"><strong>{{ count }}</strong> Item</span>
+  </footer>
+</section>
