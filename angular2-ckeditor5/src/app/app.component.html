@@ -1,0 +1,18 @@
+<section class="demo">
+  <header>
+    <h1>CKEditor5</h1>
+  </header>
+  <section class="main">
+    <form (submit)="submit()">
+      <ckeditor [editor]="Editor" [(ngModel)]="content" name="content" (change)="onChange($event)" [config]="config" (ready)="onReady($event)"></ckeditor>
+      <div class="form-group text-center">
+        <button class="btn btn-danger" type="submit">更新</button>
+      </div>
+    </form>
+    <div class="content" *ngIf="content">
+      {{ content }}
+    </div>
+  </section>
+  <footer class="footer">
+  </footer>
+</section>
