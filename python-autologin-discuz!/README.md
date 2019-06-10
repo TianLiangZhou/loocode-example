@@ -12,3 +12,9 @@ tb = HostLoc("username", "password", "https://www.hostloc.com", "hkCM_2132_auth"
 tb = HostLoc("你的登录名", "你的密码", "https://www.hostloc.com", "hkCM_2132_auth")
 
 ```
+
+```bash
+
+meshell@python# python hostloc.py 
+
+```
