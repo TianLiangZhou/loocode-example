@@ -42,8 +42,8 @@ class HostLoc(object):
     identity_cookie_name = None
 
     def __init__(self, username, password, host, identity_cookie_name):
-        self.loginFromUrl = self.host + self.loginFromUrl
         self.host = host
+        self.loginFromUrl = self.host + self.loginFromUrl
         self.referer = self.host + self.referer
         self.creditUrl = self.host + self.creditUrl
         self.http = urllib3.PoolManager(cert_reqs=ssl.CERT_NONE, assert_hostname=False)
