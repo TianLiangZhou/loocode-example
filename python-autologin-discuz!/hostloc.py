@@ -107,9 +107,9 @@ class HostLoc(object):
 
         print("昵称: %s, %s\n威望: %s, 金钱: %s" % (name, score, hcredit_1, hcredit_2))
 
-        self.visitProfile(first)
+        self.visitProfile(first, None)
 
-    def visitProfile(self, url):
+    def visitProfile(self, url, prevAllLink):
         response = self._request("get", url)
         print(url + "\n")
         bs = BeautifulSoup(response.data, "lxml")
@@ -118,10 +118,15 @@ class HostLoc(object):
         all = bs.find_all("a", class_="avt")
 
         visit_len = len(all)
-        print(visit_len)
-        if visit_len > 1 and self.visit_loop < 20:
-            index = random.randint(2, visit_len - 1)
-            self.visitProfile(self.host + "/" + all[index]['href'])
+        if self.visit_loop < 20:
+            if visit_len > 1:
+                index = random.randint(2, visit_len - 1)
+                self.visitProfile(self.host + "/" + all[index]['href'], all)
+            else:
+                if prevAllLink != None:
+                    self.visit_loop -= 1
+                    index = random.randint(2, len(prevAllLink) - 1)
+                    self.visitProfile(self.host + "/" + prevAllLink[index]['href'], all)
 
     def _request(self, method, url, fields = None):
         headers = {
