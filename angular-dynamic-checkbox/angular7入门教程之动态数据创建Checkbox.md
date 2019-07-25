@@ -183,5 +183,5 @@ export class AppComponent {
 1. <https://angular.io/guide/reactive-forms>
 2. <https://www.learnrxjs.io/>
 3. <https://cn.rx.js.org/>
-4. [查看源码]()
-5. [在线示例]()
+4. [查看源码](https://github.com/TianLiangZhou/loocode-example/tree/master/angular-dynamic-checkbox)
+5. [在线示例](https://example.loocode.com/angular-dynamic-checkbox/dist/angular-dynamic-checkbox/index.html)
