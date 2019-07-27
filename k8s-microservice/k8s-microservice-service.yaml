@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: echo-demo-service
+spec:
+  selector:
+    app: echo-demo
+  ports:
+    - protocol: TCP
+      port: 1323
+      targetPort: 1323

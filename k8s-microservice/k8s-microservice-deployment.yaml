@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: echo-demo-deployment
+spec:
+  selector:
+    matchLabels:
+      app: echo-demo
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: echo-demo
+    spec:
+      containers:
+      - name: k8s-microservice
+        image: mfkgdyve/k8s-microservice:latest
+        ports:
+        - containerPort: 1323

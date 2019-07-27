@@ -1,0 +1,15 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: echo-demo-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: \"false\"
+spec:
+  rules:
+    - host: echo.demo
+      http:
+        paths:
+        - path: /
+          backend:
+            serviceName: echo-demo-service
+            servicePort: 1323
