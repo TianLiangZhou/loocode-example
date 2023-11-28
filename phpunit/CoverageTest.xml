@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1559106321">
+  <project timestamp="1559106321">
+    <package name="App">
+      <file name="/Users/meshell/Projects/php/loocode-example/phpunit/src/Coverage.php">
+        <class name="App\Coverage" namespace="App">
+          <metrics complexity="9" methods="6" coveredmethods="5" conditionals="0" coveredconditionals="0" statements="15" coveredstatements="13" elements="21" coveredelements="18"/>
+        </class>
+        <line num="7" type="method" name="add" visibility="public" complexity="1" crap="1" count="1"/>
+        <line num="9" type="stmt" count="1"/>
+        <line num="12" type="method" name="sub" visibility="public" complexity="1" crap="1" count="1"/>
+        <line num="14" type="stmt" count="1"/>
+        <line num="17" type="method" name="div" visibility="public" complexity="1" crap="1" count="1"/>
+        <line num="19" type="stmt" count="1"/>
+        <line num="22" type="method" name="mul" visibility="public" complexity="1" crap="1" count="1"/>
+        <line num="24" type="stmt" count="1"/>
+        <line num="27" type="method" name="find" visibility="public" complexity="1" crap="1" count="1"/>
+        <line num="29" type="stmt" count="1"/>
+        <line num="32" type="method" name="binarySearch" visibility="public" complexity="4" crap="4.13" count="1"/>
+        <line num="34" type="stmt" count="1"/>
+        <line num="35" type="stmt" count="1"/>
+        <line num="37" type="stmt" count="1"/>
+        <line num="38" type="stmt" count="1"/>
+        <line num="39" type="stmt" count="1"/>
+        <line num="40" type="stmt" count="1"/>
+        <line num="42" type="stmt" count="1"/>
+        <line num="43" type="stmt" count="1"/>
+        <line num="45" type="stmt" count="0"/>
+        <line num="48" type="stmt" count="0"/>
+        <metrics loc="50" ncloc="50" classes="1" methods="6" coveredmethods="5" conditionals="0" coveredconditionals="0" statements="15" coveredstatements="13" elements="21" coveredelements="18"/>
+      </file>
+    </package>
+    <metrics files="1" loc="50" ncloc="50" classes="1" methods="6" coveredmethods="5" conditionals="0" coveredconditionals="0" statements="15" coveredstatements="13" elements="21" coveredelements="18"/>
+  </project>
+</coverage>
