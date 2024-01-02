@@ -1,0 +1,32 @@
+// 版本
+syntax = "proto3";
+
+// 生成文件的go包名
+option go_package = "go-grpc/rpc";
+
+package proto;
+
+service Authorization {
+  // 登录rpc接口
+  rpc Login(LoginRequest) returns (LoginResponse) {}
+}
+
+message LoginRequest {
+  // 第一个参数
+  string email = 1;
+  // 第二个参数
+  string password = 2;
+
+}
+
+message LoginResponse {
+  string message = 1;
+  optional User user = 2;
+}
+
+message User {
+  int64 id = 1;
+  string email = 2;
+  string username = 3;
+  string avatar = 4;
+}

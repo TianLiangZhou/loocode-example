@@ -1,0 +1,12 @@
+{
+  "require": {
+    "grpc/grpc": "^v1.39.0",
+    "google/protobuf": "^v3.12.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "GPBMetadata\\": "../php-rpc/GPBMetadata",
+      "Proto\\": "../php-rpc/Proto"
+    }
+  }
+}
