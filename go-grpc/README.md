@@ -397,3 +397,4 @@ object(Proto\User)#17 (0) {
 2. [protobuf.dev](https://protobuf.dev/)
 3. [php-generated](https://protobuf.dev/reference/php/php-generated/)
 4. [grpc_php_plugin](https://github.com/grpc/grpc/blob/master/src/php/README.md)
+5. [本文源码](https://github.com/TianLiangZhou/loocode-example/tree/master/go-grpc)
