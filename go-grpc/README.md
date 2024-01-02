@@ -391,3 +391,9 @@ object(Proto\User)#17 (0) {
 相信大家阅读此文后已经对`gRPC`有了相应的了解，在`golang`中使用`gRPC`也会有一定了解。如果您有什么问题，你可以在下方的留言区域给我留言。本文的代码都托管在[这里]()。
 
 
+## 推荐阅读
+
+1. [go quickstart](https://grpc.io/docs/languages/go/quickstart/)
+2. [protobuf.dev](https://protobuf.dev/)
+3. [php-generated](https://protobuf.dev/reference/php/php-generated/)
+4. [grpc_php_plugin](https://github.com/grpc/grpc/blob/master/src/php/README.md)
